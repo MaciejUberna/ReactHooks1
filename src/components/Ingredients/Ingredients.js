@@ -25,6 +25,10 @@ const Ingredients = (props) => {
     });
   }, []);
 
+  useEffect(() => {
+    console.log('RENDERING INGREDIENTS', userIngredients);
+  },[userIngredients]);
+
   const addIngredientHandler = ingredient => {
     fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
       method: 'POST',
