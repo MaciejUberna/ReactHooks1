@@ -19,11 +19,10 @@ const Ingredients = (props) => {
   }
 
   const removeIngredientHandler = ingId => {
-    setUserIngredients(prevIngredients => [
-      ...prevIngredients.filter( (ingredient) => {
+    setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
         return ingredient.id !== ingId;
       })
-    ]);
+    );
   }
 
   return (
