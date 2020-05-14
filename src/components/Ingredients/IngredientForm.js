@@ -8,6 +8,10 @@ const IngredientForm = React.memo(props => {
   //useState returns always an array with exackly 2 elements:
   //1. current state snapshot, for this rerender cycle of this component
   //2. function that allows you to update your current state
+
+  //2 rooles of using hooks:
+  //1. You MUST use hook inside functions or other custom hooks.
+  //2. Use hooks in root level of your component and cannot use hook in for example if statement
   const [enteredTitle, setEnteredTitle] = useState('');
   const [enteredAmount, setEnteredAmount] = useState('');
 
