@@ -6,16 +6,22 @@ import Search from './Search';
 
 const Ingredients = (props) => {
   const [ userIngredients, setUserIngredients ] = useState([]);
-  const [ userIngredientsCtr, setUserIngredientsCtr ] = useState(0);
 
   const addIngredientHandler = ingredient => {
-    setUserIngredients(prevIngredients =>
-      [
-        ...prevIngredients, 
-        {id: userIngredientsCtr, ...ingredient}
-      ]
-    );
-    setUserIngredientsCtr(prevState => (prevState + 1));
+    fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
+      method: 'POST',
+      body: JSON.stringify(ingredient),
+      headers: { 'Content-Type': 'application/json' }
+    }).then( response => {
+      return response.json();
+    }).then(responseData => {
+      setUserIngredients(prevIngredients =>
+        [
+          ...prevIngredients, 
+          {id: responseData.name, ...ingredient}
+        ]
+      );
+    });
   }
 
   const removeIngredientHandler = ingId => {
