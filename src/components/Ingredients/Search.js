@@ -21,7 +21,7 @@ const Search = React.memo(props => {
           ...responseData[key]
         });
       };
-      //onLoadIngredients(loadedIngredients)
+      onLoadIngredients(loadedIngredients)
     });
   },[filter, onLoadIngredients])
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -7,31 +7,14 @@ import Search from './Search';
 const Ingredients = (props) => {
   const [ userIngredients, setUserIngredients ] = useState([]);
 
-  //Use effect buy default gets executed after evry component render cycle and when for every render cycle.
-  // without [] as the last argument useEffect racts like componentDidUpdate it runs function after evry component update
-  // with [] it behaves like componentDidMount, it runs onlu once after the render
-  useEffect(() => {
-    fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json')
-    .then(response => response.json())
-    .then(responseData => {
-      const loadedIngredients= [];
-      for(const key in responseData) {
-        loadedIngredients.push({
-          id: key,
-          ...responseData[key]
-        });
-      };
-      setUserIngredients(loadedIngredients);
-    });
-  }, []);
-
   useEffect(() => {
     console.log('RENDERING INGREDIENTS', userIngredients);
   },[userIngredients]);
 
-  const filteredIngredientsHandler = (filteredIngredients) => {
+  //With useCallback in this configuration the function will never re-run.
+  const filteredIngredientsHandler = useCallback(filteredIngredients => {
     setUserIngredients(filteredIngredients);
-  }
+  }, []);
 
   const addIngredientHandler = ingredient => {
     fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
