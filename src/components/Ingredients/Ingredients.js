@@ -29,6 +29,10 @@ const Ingredients = (props) => {
     console.log('RENDERING INGREDIENTS', userIngredients);
   },[userIngredients]);
 
+  const filteredIngredientsHandler = (filteredIngredients) => {
+    setUserIngredients(filteredIngredients);
+  }
+
   const addIngredientHandler = ingredient => {
     fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
       method: 'POST',
@@ -58,7 +62,7 @@ const Ingredients = (props) => {
       <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search />
+        <Search onLoadIngredients={filteredIngredientsHandler}/>
         <IngredientList ingredients={userIngredients} onRemoveItem={removeIngredientHandler}/>
       </section>
     </div>
