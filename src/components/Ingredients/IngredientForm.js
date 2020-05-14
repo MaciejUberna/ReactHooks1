@@ -21,7 +21,6 @@ const IngredientForm = React.memo(props => {
         <form onSubmit={submitHandler}>
           <div className="form-control">
             <label htmlFor="title">Name</label>
-            {/* This first imput updates the state in the most correct way ensuring that all elements of state will be updated to the latest one.*/}
             <input type="text" id="title" value={ing.title} onChange={event => {
               const newTitle = event.target.value;
               setIng(prevState => ({
@@ -34,10 +33,14 @@ const IngredientForm = React.memo(props => {
           </div>
           <div className="form-control">
             <label htmlFor="amount">Amount</label>
-            <input type="number" id="amount" value={ing.amount} onChange={event => setIng({
-              ...ing,
-              amount: event.target.value,
-            })}/>
+            <input type="number" id="amount" value={ing.amount} onChange={event => {
+              const newAmount = event.target.value;
+              setIng(prevState => ({
+              ...prevState,
+              amount: newAmount,
+            }))
+            }
+            }/>
           </div>
           <div className="ingredient-form__actions">
             <button type="submit">Add Ingredient</button>
