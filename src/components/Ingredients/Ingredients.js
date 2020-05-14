@@ -6,14 +6,24 @@ import Search from './Search';
 
 const Ingredients = (props) => {
   const [ userIngredients, setUserIngredients ] = useState([]);
+  const [ userIngredientsCtr, setUserIngredientsCtr ] = useState(0);
 
   const addIngredientHandler = ingredient => {
     setUserIngredients(prevIngredients =>
       [
         ...prevIngredients, 
-        {id: Math.random().toString(), ...ingredient}
+        {id: userIngredientsCtr, ...ingredient}
       ]
     );
+    setUserIngredientsCtr(prevState => (prevState + 1));
+  }
+
+  const removeIngredientHandler = ingId => {
+    setUserIngredients(prevIngredients => [
+      ...prevIngredients.filter( (ingredient) => {
+        return ingredient.id !== ingId;
+      })
+    ]);
   }
 
   return (
@@ -22,7 +32,7 @@ const Ingredients = (props) => {
 
       <section>
         <Search />
-        <IngredientList ingredients={userIngredients} onRemoveItem={() => {}}/>
+        <IngredientList ingredients={userIngredients} onRemoveItem={removeIngredientHandler}/>
       </section>
     </div>
   );
