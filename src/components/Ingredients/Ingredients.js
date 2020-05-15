@@ -34,10 +34,14 @@ const Ingredients = (props) => {
   }
 
   const removeIngredientHandler = ingId => {
-    setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
+    fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
+      method: 'DELETE',
+    }).then(response => {
+      setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
         return ingredient.id !== ingId;
       })
-    );
+      );
+    })
   }
 
   return (
