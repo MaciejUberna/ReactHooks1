@@ -51,13 +51,14 @@ const Ingredients = (props) => {
       );
       setIsLoading(false);
     }).catch( error => {
+      // This one and the same render cycle, commands below are not rendered separetelly
       setError(error.message);
+      setIsLoading(false);
     });
   }
 
   const clearError = () => {
     setError(null);
-    setIsLoading(false);
   }
 
   return (
