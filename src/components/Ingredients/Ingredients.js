@@ -37,6 +37,7 @@ const Ingredients = (props) => {
   }
 
   const removeIngredientHandler = ingId => {
+    setIsLoading(true);
     fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
       method: 'DELETE',
     }).then(response => {
@@ -44,6 +45,7 @@ const Ingredients = (props) => {
         return ingredient.id !== ingId;
       })
       );
+      setIsLoading(false);
     })
   }
 
