@@ -1,12 +1,26 @@
-import React, { useState, useEffect, useCallback} from 'react';
+import React, { useReducer, useState, useEffect, useCallback} from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
 
+const ingredientReducer = (currentIngredients, action) => {
+  switch(action.type) {
+    case 'SET':
+      return action.ingredients;
+    case 'ADD':
+      return [...currentIngredients, action.ingredient];
+    case 'DELETE':
+      return currentIngredients.filter(ing => ing.id !== action.id);
+    default: 
+      throw new Error('Should not get there!');
+  };
+};
+
 const Ingredients = (props) => {
-  const [ userIngredients, setUserIngredients ] = useState([]);
+  const [ userIngredients, dispatch ] = useReducer(ingredientReducer,[]);
+  //const [ userIngredients, setUserIngredients ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(false);
   const [ error, setError ] = useState();
 
@@ -16,7 +30,8 @@ const Ingredients = (props) => {
 
   //With useCallback in this configuration the function will never re-run.
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
-    setUserIngredients(filteredIngredients);
+    //setUserIngredients(filteredIngredients);
+    dispatch({type: 'SET', ingredients: filteredIngredients});
   }, []);
 
   const addIngredientHandler = ingredient => {
@@ -29,14 +44,16 @@ const Ingredients = (props) => {
       setIsLoading(false);
       return response.json();
     }).then(responseData => {
-      setUserIngredients(prevIngredients =>
+      /*setUserIngredients(prevIngredients =>
         [
           ...prevIngredients, 
           {id: responseData.name, ...ingredient}
         ]
-      );
+      );*/
+      dispatch({type: 'ADD', ingredient: {id: responseData.name, ...ingredient}});
     }).catch(error => {
       setError(error.message);
+      setIsLoading(false);
     });
   }
 
@@ -45,10 +62,11 @@ const Ingredients = (props) => {
     fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
       method: 'DELETE',
     }).then(response => {
-      setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
+      /*setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
         return ingredient.id !== ingId;
       })
-      );
+      );*/
+      dispatch({type: 'DELETE',id: ingId});
       setIsLoading(false);
     }).catch( error => {
       // This one and the same render cycle, commands below are not rendered separetelly
