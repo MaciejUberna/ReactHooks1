@@ -6,6 +6,7 @@ import Search from './Search';
 
 const Ingredients = (props) => {
   const [ userIngredients, setUserIngredients ] = useState([]);
+  const [ isLoading, setIsLoading ] = useState(false);
 
   useEffect(() => {
     console.log('RENDERING INGREDIENTS', userIngredients);
@@ -17,11 +18,13 @@ const Ingredients = (props) => {
   }, []);
 
   const addIngredientHandler = ingredient => {
+    setIsLoading(true);
     fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     }).then( response => {
+      setIsLoading(false);
       return response.json();
     }).then(responseData => {
       setUserIngredients(prevIngredients =>
@@ -46,7 +49,7 @@ const Ingredients = (props) => {
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler} />
+      <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler}/>
