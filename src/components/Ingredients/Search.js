@@ -10,7 +10,7 @@ const Search = React.memo(props => {
 
   useEffect(() => {
     //Here we compare value filter from past 1/2s and current filter value
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if(filter === inputRef.current.value) {
         const query = filter.length === 0 
           ? '' 
@@ -29,6 +29,11 @@ const Search = React.memo(props => {
         });
       }
     },500);
+    //The cleanup will run for previous effect before new effect is applied.
+    //So this cleans up the old timer before it sets a new one and this ensures the we always only have one.
+    return () => {
+      clearTimeout(timer);
+    };
   },[filter, onLoadIngredients, inputRef])
 
   return (
