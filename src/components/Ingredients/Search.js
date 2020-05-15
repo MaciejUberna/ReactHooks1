@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import Card from '../UI/Card';
+import ErrorModal from '../UI/ErrorModal';
 import './Search.css';
 
 const Search = React.memo(props => {
   const { onLoadIngredients } = props;
   const [filter, setFilter] = useState('');
   const inputRef = useRef();
+  const [ error, setError ] = useState();
 
   useEffect(() => {
     //Here we compare value filter from past 1/2s and current filter value
@@ -26,6 +28,8 @@ const Search = React.memo(props => {
             });
           };
           onLoadIngredients(loadedIngredients)
+        }).catch(error => {
+          setError(error.message)
         });
       }
     },500);
@@ -36,8 +40,13 @@ const Search = React.memo(props => {
     };
   },[filter, onLoadIngredients, inputRef])
 
+  const clearError = () => {
+    setError(null);
+  }
+
   return (
     <section className="search">
+      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal> }
       <Card>
         <div className="search-input">
           <label>Filter by Title</label>

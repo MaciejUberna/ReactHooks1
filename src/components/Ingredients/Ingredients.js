@@ -3,10 +3,12 @@ import React, { useState, useEffect, useCallback} from 'react';
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
+import ErrorModal from '../UI/ErrorModal';
 
 const Ingredients = (props) => {
   const [ userIngredients, setUserIngredients ] = useState([]);
   const [ isLoading, setIsLoading ] = useState(false);
+  const [ error, setError ] = useState();
 
   useEffect(() => {
     console.log('RENDERING INGREDIENTS', userIngredients);
@@ -33,6 +35,8 @@ const Ingredients = (props) => {
           {id: responseData.name, ...ingredient}
         ]
       );
+    }).catch(error => {
+      setError(error.message);
     });
   }
 
@@ -46,11 +50,21 @@ const Ingredients = (props) => {
       })
       );
       setIsLoading(false);
-    })
+    }).catch( error => {
+      setError(error.message);
+    });
+  }
+
+  const clearError = () => {
+    setError(null);
+    setIsLoading(false);
   }
 
   return (
     <div className="App">
+
+      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal> }
+
       <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
 
       <section>
