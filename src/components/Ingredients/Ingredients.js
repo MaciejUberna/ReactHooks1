@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect, useCallback} from 'react';
+import React, { useReducer, useEffect, useCallback} from 'react';
 
 import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
@@ -18,11 +18,27 @@ const ingredientReducer = (currentIngredients, action) => {
   };
 };
 
+const httpReducer = (currHttpState, action) => {
+  switch(action.type) {
+    case 'SEND':
+      return {loading: true, error: null};
+    case 'GET':
+      return {...currHttpState, loading: false};
+    case 'ERROR':
+      return {loading: false, error: action.error};
+    case 'CLEAR':
+      return {...currHttpState, error: null}
+    default: 
+      throw new Error('Should not be reached!');
+  };
+};
+
 const Ingredients = (props) => {
+  const [ httpState, dispatchHttp ] = useReducer(httpReducer,{loading: false, error: null});
   const [ userIngredients, dispatch ] = useReducer(ingredientReducer,[]);
   //const [ userIngredients, setUserIngredients ] = useState([]);
-  const [ isLoading, setIsLoading ] = useState(false);
-  const [ error, setError ] = useState();
+  //const [ isLoading, setIsLoading ] = useState(false);
+  //const [ error, setError ] = useState();
 
   useEffect(() => {
     console.log('RENDERING INGREDIENTS', userIngredients);
@@ -35,13 +51,15 @@ const Ingredients = (props) => {
   }, []);
 
   const addIngredientHandler = ingredient => {
-    setIsLoading(true);
+    //setIsLoading(true);
+    dispatchHttp({type: 'SEND'});
     fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
       method: 'POST',
       body: JSON.stringify(ingredient),
       headers: { 'Content-Type': 'application/json' }
     }).then( response => {
-      setIsLoading(false);
+      //setIsLoading(false);
+      dispatchHttp({type: 'GET'});
       return response.json();
     }).then(responseData => {
       /*setUserIngredients(prevIngredients =>
@@ -52,13 +70,15 @@ const Ingredients = (props) => {
       );*/
       dispatch({type: 'ADD', ingredient: {id: responseData.name, ...ingredient}});
     }).catch(error => {
-      setError(error.message);
-      setIsLoading(false);
+      //setError(error.message);
+      //setIsLoading(false);
+      dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::addIngredientHandler'});
     });
   }
 
   const removeIngredientHandler = ingId => {
-    setIsLoading(true);
+    //setIsLoading(true);
+    dispatchHttp({type: 'SEND'});
     fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
       method: 'DELETE',
     }).then(response => {
@@ -67,24 +87,27 @@ const Ingredients = (props) => {
       })
       );*/
       dispatch({type: 'DELETE',id: ingId});
-      setIsLoading(false);
+      //setIsLoading(false);
+      dispatchHttp({type: 'GET'});
     }).catch( error => {
       // This one and the same render cycle, commands below are not rendered separetelly
-      setError(error.message);
-      setIsLoading(false);
+      //setError(error.message);
+      //setIsLoading(false);
+      dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::removeIngredientHandler'});
     });
   }
 
   const clearError = () => {
-    setError(null);
+    //setError(null);
+    dispatchHttp({type: 'CLEAR'});
   }
 
   return (
     <div className="App">
 
-      {error && <ErrorModal onClose={clearError}>{error}</ErrorModal> }
+      {httpState.error && <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal> }
 
-      <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
+      <IngredientForm onAddIngredient={addIngredientHandler} loading={httpState.loading}/>
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler}/>
