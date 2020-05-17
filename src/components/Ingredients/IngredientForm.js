@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
 import LoadingIndicator from '../UI/LoadingIndicator';
-
 import Card from '../UI/Card';
 import './IngredientForm.css';
 
 const IngredientForm = React.memo(props => {
+
+
   //it's better to use strings because throm input we always get strings
   //useState returns always an array with exackly 2 elements:
   //1. current state snapshot, for this rerender cycle of this component
@@ -16,6 +17,7 @@ const IngredientForm = React.memo(props => {
   //2. Use hooks in root level of your component and cannot use hook in for example if statement
   const [enteredTitle, setEnteredTitle] = useState('');
   const [enteredAmount, setEnteredAmount] = useState('');
+  console.log('RENDERING INGREDIENT FORM');
 
   const submitHandler = event => {
     event.preventDefault();
