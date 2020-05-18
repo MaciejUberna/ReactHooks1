@@ -5,6 +5,7 @@ import IngredientForm from './IngredientForm';
 import IngredientList from './IngredientList';
 import Search from './Search';
 import ErrorModal from '../UI/ErrorModal';
+import useHttp from '../../hooks/http';
 
 const ingredientReducer = (currentIngredients, action) => {
   switch(action.type) {
@@ -19,24 +20,12 @@ const ingredientReducer = (currentIngredients, action) => {
   };
 };
 
-const httpReducer = (currHttpState, action) => {
-  switch(action.type) {
-    case 'SEND':
-      return {loading: true, error: null};
-    case 'GET':
-      return {...currHttpState, loading: false};
-    case 'ERROR':
-      return {loading: false, error: action.error};
-    case 'CLEAR':
-      return {...currHttpState, error: null}
-    default: 
-      throw new Error('Should not be reached!');
-  };
-};
-
 const Ingredients = (props) => {
-  const [ httpState, dispatchHttp ] = useReducer(httpReducer,{loading: false, error: null});
+  //const [ httpState, dispatchHttp ] = useReducer(httpReducer,{loading: false, error: null});
+  
   const [ userIngredients, dispatch ] = useReducer(ingredientReducer,[]);
+  const {isLoading, error, data, sendRequest} = useHttp();
+  
   //const [ userIngredients, setUserIngredients ] = useState([]);
   //const [ isLoading, setIsLoading ] = useState(false);
   //const [ error, setError ] = useState();
@@ -53,54 +42,58 @@ const Ingredients = (props) => {
 
   const addIngredientHandler = useCallback(ingredient => {
     //setIsLoading(true);
-    dispatchHttp({type: 'SEND'});
-    fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
-      method: 'POST',
-      body: JSON.stringify(ingredient),
-      headers: { 'Content-Type': 'application/json' }
-    }).then( response => {
-      //setIsLoading(false);
-      dispatchHttp({type: 'GET'});
-      return response.json();
-    }).then(responseData => {
-      /*setUserIngredients(prevIngredients =>
-        [
-          ...prevIngredients, 
-          {id: responseData.name, ...ingredient}
-        ]
-      );*/
-      dispatch({type: 'ADD', ingredient: {id: responseData.name, ...ingredient}});
-    }).catch(error => {
-      //setError(error.message);
-      //setIsLoading(false);
-      dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::addIngredientHandler'});
-    });
+    // dispatchHttp({type: 'SEND'});
+    // fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
+    //   method: 'POST',
+    //   body: JSON.stringify(ingredient),
+    //   headers: { 'Content-Type': 'application/json' }
+    // }).then( response => {
+    //   //setIsLoading(false);
+    //   dispatchHttp({type: 'GET'});
+    //   return response.json();
+    // }).then(responseData => {
+    //   /*setUserIngredients(prevIngredients =>
+    //     [
+    //       ...prevIngredients, 
+    //       {id: responseData.name, ...ingredient}
+    //     ]
+    //   );*/
+    //   dispatch({type: 'ADD', ingredient: {id: responseData.name, ...ingredient}});
+    // }).catch(error => {
+    //   //setError(error.message);
+    //   //setIsLoading(false);
+    //   dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::addIngredientHandler'});
+    // });
   }, []);
 
   const removeIngredientHandler = useCallback(ingId => {
+    sendRequest(
+      `https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`,
+      'DELETE'      
+    );
     //setIsLoading(true);
-    dispatchHttp({type: 'SEND'});
-    fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
-      method: 'DELETE',
-    }).then(response => {
-      /*setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
-        return ingredient.id !== ingId;
-      })
-      );*/
-      dispatch({type: 'DELETE',id: ingId});
-      //setIsLoading(false);
-      dispatchHttp({type: 'GET'});
-    }).catch( error => {
-      // This one and the same render cycle, commands below are not rendered separetelly
-      //setError(error.message);
-      //setIsLoading(false);
-      dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::removeIngredientHandler'});
-    });
-  },[]);
+    // dispatchHttp({type: 'SEND'});
+    // fetch(`https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`, {
+    //   method: 'DELETE',
+    // }).then(response => {
+    //   /*setUserIngredients(prevIngredients => prevIngredients.filter( (ingredient) => {
+    //     return ingredient.id !== ingId;
+    //   })
+    //   );*/
+    //   dispatch({type: 'DELETE',id: ingId});
+    //   //setIsLoading(false);
+    //   dispatchHttp({type: 'GET'});
+    // }).catch( error => {
+    //   // This one and the same render cycle, commands below are not rendered separetelly
+    //   //setError(error.message);
+    //   //setIsLoading(false);
+    //   dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::removeIngredientHandler'});
+    // });
+  },[sendRequest]);
 
   const clearError = useCallback(() => {
     //setError(null);
-    dispatchHttp({type: 'CLEAR'});
+    // dispatchHttp({type: 'CLEAR'});
   },[]);
 
   //List of dependencies in useMemo tells in which dependencies - objects influence memo to rerun it and update the variable
@@ -117,11 +110,11 @@ const Ingredients = (props) => {
   return (
     <div className="App">
 
-      {httpState.error && (
-        <ErrorModal onClose={clearError}>{httpState.error}</ErrorModal> 
+      {error && (
+        <ErrorModal onClose={clearError}>{error}</ErrorModal> 
       )}
 
-      <IngredientForm onAddIngredient={addIngredientHandler} loading={httpState.loading}/>
+      <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
 
       <section>
         <Search onLoadIngredients={filteredIngredientsHandler}/>
