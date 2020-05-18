@@ -24,15 +24,22 @@ const Ingredients = (props) => {
   //const [ httpState, dispatchHttp ] = useReducer(httpReducer,{loading: false, error: null});
   
   const [ userIngredients, dispatch ] = useReducer(ingredientReducer,[]);
-  const {isLoading, error, data, sendRequest} = useHttp();
+  const {isLoading, error, data, sendRequest, reqExtra, indentifier, clear} = useHttp();
   
   //const [ userIngredients, setUserIngredients ] = useState([]);
   //const [ isLoading, setIsLoading ] = useState(false);
   //const [ error, setError ] = useState();
 
   useEffect(() => {
-    console.log('RENDERING INGREDIENTS', userIngredients);
-  },[userIngredients]);
+    //console.log('isLoading:'+isLoading+'\nerror:'+error+'\nindentifier:'+indentifier+'\ndata',data,'\nreqExtra:'+reqExtra)
+    if (!isLoading && !error && indentifier === 'DEL_INGREDIENT') {
+      //console.log('DEL_INGREDIENT fired');
+      dispatch({type: 'DELETE',id: reqExtra});
+    } else if(!isLoading && !error && indentifier === 'ADD_INGREDIENT'){
+      //console.log('ADD_INGREDIENT fired')
+      dispatch({type: 'ADD', ingredient: {id: data.name, ...reqExtra}});
+    }
+  },[data, reqExtra, indentifier, error, isLoading]);
 
   //With useCallback in this configuration the function will never re-run.
   const filteredIngredientsHandler = useCallback(filteredIngredients => {
@@ -41,6 +48,13 @@ const Ingredients = (props) => {
   }, []);
 
   const addIngredientHandler = useCallback(ingredient => {
+    sendRequest(
+      'https://maciej-hooks-update.firebaseio.com/ingredients.json',
+      'POST',
+      JSON.stringify(ingredient),
+      ingredient,
+      'ADD_INGREDIENT'
+    );
     //setIsLoading(true);
     // dispatchHttp({type: 'SEND'});
     // fetch('https://maciej-hooks-update.firebaseio.com/ingredients.json', {
@@ -64,12 +78,15 @@ const Ingredients = (props) => {
     //   //setIsLoading(false);
     //   dispatchHttp({type: 'ERROR',error: 'Failed to featch in Ingredients.js::addIngredientHandler'});
     // });
-  }, []);
+  }, [sendRequest]);
 
   const removeIngredientHandler = useCallback(ingId => {
     sendRequest(
       `https://maciej-hooks-update.firebaseio.com/ingredients/${ingId}.json`,
-      'DELETE'      
+      'DELETE',
+      null,
+      ingId,
+      'DEL_INGREDIENT'
     );
     //setIsLoading(true);
     // dispatchHttp({type: 'SEND'});
@@ -91,10 +108,10 @@ const Ingredients = (props) => {
     // });
   },[sendRequest]);
 
-  const clearError = useCallback(() => {
-    //setError(null);
-    // dispatchHttp({type: 'CLEAR'});
-  },[]);
+  // const clearError = useCallback(() => {
+  //   //setError(null);
+  //   //dispatchHttp({type: 'CLEAR'});
+  // },[]);
 
   //List of dependencies in useMemo tells in which dependencies - objects influence memo to rerun it and update the variable
   //useMemo is an alternarive to React.memo(...)
@@ -111,7 +128,7 @@ const Ingredients = (props) => {
     <div className="App">
 
       {error && (
-        <ErrorModal onClose={clearError}>{error}</ErrorModal> 
+        <ErrorModal onClose={clear}>{error}</ErrorModal> 
       )}
 
       <IngredientForm onAddIngredient={addIngredientHandler} loading={isLoading}/>
